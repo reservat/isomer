@@ -1,8 +1,11 @@
-var iso = new Isomer(document.getElementById("canvas"));
+
+
+var iso = new Isomer(document.getElementById("canvas"), {shadows: true});
 var Point = Isomer.Point;
 var Path = Isomer.Path;
 var Shape = Isomer.Shape;
 var Color = Isomer.Color;
+var Prism = Isomer.Prism;
 
 function shoe() {
     var points = [
@@ -73,8 +76,39 @@ var T = new Path([
     Point(1, 3)
 ]);
 
+var table = new Path([
+    Point(0, 0),
+    Point(0, 0.8),
+    Point(1, 0.8),
+    Point(1, 0),
+    Point(0.8, 0),
+    Point(0.8, 0.6),
+    Point(0.2, 0.6),
+    Point(0.2, 0)
+]);
+
+function tableGenerator(x, y)
+{
+    var innerLeg = (x - 0.2);
+    var path = new Path([
+        Point(0, 0),
+        Point(0, 1),
+        Point(x, 1),
+        Point(x, 0),
+        Point(innerLeg, 0),
+        Point(innerLeg, 0.8),
+        Point(0.2, 0.8),
+        Point(0.2, 0)
+    ]);
+    
+    return Shape.Extrude(path, y);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    //iso.add(Shape.Extrude(I, 1), Point(2, 0, 4), 0x66FF88);
-    iso.add(Shape.Extrude(I, 1), Point(2, 0, 4), Color(102, 255, 136));
+    let tableColor = Color(211,84,0);
+    iso.add(Shape.Box(20, 0.5, 20), Point(-10, -0.5, -10), Color(184, 193, 197), {});
+    iso.add(tableGenerator(2, 1), Point(1, 0, 1), tableColor, {receiveShadow : false});
+    iso.add(tableGenerator(1, 2), Point(3, 0, 3), tableColor, {receiveShadow : false});
+    iso.add(tableGenerator(1, 1), Point(2, 0, -1), tableColor, {receiveShadow : false});
     iso.render();
 });

@@ -4,7 +4,6 @@ var Path = require('./path');
 var Shape = require('./shape');
 var THREE = require('three');
 
-
 /**
  * The Isomer class
  *
@@ -33,12 +32,13 @@ function Isomer(canvas, options) {
         1000);
 
     this.camera.position.set(-100, 100, -100);
-    this.camera.lookAt({x: 0, y: 10, z: 0});
-
+    this.camera.lookAt({x: 0, y: 0, z: 0});
+    
     this.shadows = options.shadows;
 
     // Set the global light
     var light = new THREE.DirectionalLight(0xFFFFFF);
+    //light.intensity = 0.5;
 
     if (this.shadows) {
         light.castShadow = true;
@@ -50,6 +50,7 @@ function Isomer(canvas, options) {
         light.shadowCameraBottom = -20;
         light.shadowCameraLeft = -20;
         light.shadowCameraRight = 20;
+        light.shadowDarkness = 0.1;
     }
 
     light.position.set(2, 1.5, -2).normalize();
@@ -57,7 +58,7 @@ function Isomer(canvas, options) {
 
     // A second, dimmer light from the -x axis
     var dimLight = new THREE.DirectionalLight(0xFFFFFF);
-    dimLight.intensity = 0.4;
+    dimLight.intensity = 0.2;
     dimLight.position.set(-1, 0, 0).normalize();
     this.scene.add(dimLight);
 
@@ -71,6 +72,7 @@ function Isomer(canvas, options) {
 
     if (this.shadows) {
         this.renderer.shadowMapEnabled = true;
+        this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
     }
 
     this.renderer.setClearColor(0x000000, 0);
@@ -88,7 +90,7 @@ Isomer.Shape = Shape;
 /**
  * Adds a shape or path to the scene
  */
-Isomer.prototype.add = function(item, point, color) {
+Isomer.prototype.add = function(item, point, color, opts) {
     var material, mesh, geometry;
     // TODO: add a group!
 
@@ -105,13 +107,14 @@ Isomer.prototype.add = function(item, point, color) {
 
     material = new THREE.MeshLambertMaterial({
         color: color,
-        side: THREE.FrontSide
+        side: THREE.DoubleSide
     });
+
     mesh = new THREE.Mesh(geometry, material);
 
     if (this.shadows) {
         mesh.castShadow = true;
-        mesh.receiveShadow = true;
+        mesh.receiveShadow = opts.receiveShadow !== undefined ? opts.receiveShadow : true;
     }
 
     // Translate to the given origin specified by the user
@@ -119,6 +122,8 @@ Isomer.prototype.add = function(item, point, color) {
         new THREE.Matrix4().makeTranslation(point.x, point.y, point.z));
 
     this.scene.add(mesh);
+
+    return mesh;
 };
 
 
@@ -129,3 +134,4 @@ Isomer.prototype.render = function () {
 
 // Expose Isomer API
 module.exports = Isomer;
+
